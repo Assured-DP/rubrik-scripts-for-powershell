@@ -288,7 +288,25 @@ if ($BackupType -eq 'Full'){
 Write-Host "Waiting for all backups to finish"
 foreach ($Database in $DatabasesToBeBackedUp | Where-Object { $_.Exclude -eq $false }) {
     Write-Host "Waiting for backup of $($Database.name) to complete"
-    $Database.RubrikRequest = Get-RubrikRequest -id $Database.RubrikRequest.id -Type mssql -WaitForCompletion
+
+    $JobComplete = $false
+    
+    while (-not $JobComplete) {
+        # Get the status of the Rubrik request
+        $RubrikRequestStatus = Get-RubrikRequest -id $Database.RubrikRequest.id -Type mssql
+        
+        # Check if the job has completed
+        if ($RubrikRequestStatus.status -eq 'SUCCESS' -or $RubrikRequestStatus.status -eq 'FAILED' -or $RubrikRequestStatus.status -eq 'CANCELLED') {
+            $JobComplete = $true
+            Write-Host "Backup of $($Database.name) is complete with status: $($RubrikRequestStatus.status)"
+        }
+        else {
+            Write-Host "Backup of $($Database.name) is still in progress. Status: $($RubrikRequestStatus.status)"
+        }
+        
+        # Wait for 30 seconds before checking again
+        Start-Sleep -Seconds 30
+    }
 }
 #endregion
 return $DatabasesToBeBackedUp
