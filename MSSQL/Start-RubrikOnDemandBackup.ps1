@@ -296,7 +296,7 @@ foreach ($Database in $DatabasesToBeBackedUp | Where-Object { $_.Exclude -eq $fa
         $RubrikRequestStatus = Get-RubrikRequest -id $Database.RubrikRequest.id -Type mssql
         
         # Check if the job has completed
-        if ($RubrikRequestStatus.status -eq 'SUCCESS' -or $RubrikRequestStatus.status -eq 'FAILED' -or $RubrikRequestStatus.status -eq 'CANCELLED') {
+        if ($RubrikRequestStatus.status -eq 'SUCCEEDED' -or $RubrikRequestStatus.status -eq 'FAILED' -or $RubrikRequestStatus.status -eq 'CANCELLED') {
             $JobComplete = $true
             Write-Host "Backup of $($Database.name) is complete with status: $($RubrikRequestStatus.status)"
         }
